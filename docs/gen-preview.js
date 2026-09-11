@@ -2,8 +2,8 @@
 //
 // Regenerates docs/preview.svg, the image in the README. The perforation comes
 // from the plugin's own holeCenters(), so the picture can't drift from what the
-// plugin actually cuts. vignette() mirrors the one in ui.html — no bundler here,
-// so like the hole loop it's repeated rather than shared.
+// plugin actually cuts. The vignette belongs to this file alone — the panel
+// preview shows a blank panel instead, since there it stands in for your frame.
 const fs = require('fs');
 const path = require('path');
 const { holeCenters } = require('../code.js');

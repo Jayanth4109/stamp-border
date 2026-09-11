@@ -19,18 +19,15 @@ function holeCenters(x0, y0, w, h, spacing) {
 }
 
 function main() {
-  figma.showUI(__html__, { width: 300, height: 522, themeColors: true });
+  figma.showUI(__html__, { width: 300, height: 559, themeColors: true });
 
   let targets = pickTargets();
-  let last = null; // last-used settings, for frames that have never been stamped
-  const loaded = figma.clientStorage.getAsync('opts').then((o) => { last = o || null; });
-
-  figma.on('selectionchange', () => { targets = pickTargets(); report(targets, last); });
+  figma.on('selectionchange', () => { targets = pickTargets(); report(targets); });
 
   figma.ui.onmessage = (msg) => {
     // The UI asks once it's listening — posting earlier races the iframe load,
     // and a frame selected before the plugin opened would go unnoticed.
-    if (msg.type === 'ready') { loaded.then(() => report(targets, last)); return; }
+    if (msg.type === 'ready') { report(targets); return; }
 
     if (msg.type === 'remove') {
       if (!targets.length) { figma.notify('Select a stamped frame'); return; }
@@ -42,15 +39,16 @@ function main() {
 
     if (msg.type !== 'apply') return;
     if (!targets.length) { figma.notify('Select a frame to stamp'); return; }
-    last = msg.opts;
-    figma.clientStorage.setAsync('opts', msg.opts);
     figma.currentPage.selection = targets.map((n) => { unwrap(n); return build(n, msg.opts); });
   };
 }
 
-// Hand the UI the frame's real shape, plus the settings it was last stamped
-// with so the sliders land exactly where the user left them.
-function report(targets, last) {
+// Hand the UI the frame's real shape, plus the settings this frame was stamped
+// with so the controls land exactly where the user left them. A frame that has
+// never been stamped reports none, and the UI falls back to its defaults —
+// carrying the last-used settings over instead meant the defaults were never
+// what you actually saw.
+function report(targets) {
   const n = targets[0];
   figma.ui.postMessage({
     type: 'selection',
@@ -59,7 +57,7 @@ function report(targets, last) {
     name: n ? n.name : null,
     w: n ? n.width : null,
     h: n ? n.height : null,
-    opts: (n && readOpts(n)) || last,
+    opts: (n && readOpts(n)) || null,
     stamped: !!(n && readOpts(n)),
   });
 }

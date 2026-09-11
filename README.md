@@ -45,8 +45,8 @@ into the paper margin instead.
 Each stamp remembers its own settings. Select a frame you stamped earlier and
 the sliders land back on the values you used, with a dot next to the frame name
 to say so — so you can come back a week later and nudge the perf size without
-guessing what it was. A frame you've never stamped starts from whatever you used
-last.
+guessing what it was. A frame you've never stamped starts from the defaults —
+padding 20, perf size 8, perf spacing 25, corner 0, white paper, shadow on.
 
 Dragging a control only redraws the panel preview. The canvas changes when you
 press **Apply to selection** — nothing edits your document behind your back, and
@@ -85,10 +85,14 @@ corner. Every edge mirrors around its midpoint. That's the only non-obvious
 math, and it's what `check.js` covers.
 
 Settings are stored with `setPluginData` on the frame rather than on the wrapper
-group, so they survive a rebuild, an ungroup and a duplicate. The panel only
-adopts reported settings when the selection moves to a different frame — every
-apply echoes a selection back, and swallowing that is what keeps a mid-drag
-rebuild from yanking the slider out from under the cursor.
+group, so they survive a rebuild, an ungroup and a duplicate. Nothing is kept
+globally: a frame with no stamp reports no settings and the panel starts from
+its defaults. An earlier version fell back to the last-used values instead,
+which meant the defaults were never what you actually saw.
+
+The panel only adopts reported settings when the selection moves to a different
+frame — every apply echoes a selection back, and swallowing that is what keeps a
+mid-drag rebuild from yanking a control out from under the cursor.
 
 Re-running has to re-cut in place rather than stack a second stamp, so it lifts
 the frame out of its old group and takes the stale perforation with it — the

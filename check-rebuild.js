@@ -39,7 +39,6 @@ class Node {
 
 const page = new Node('PAGE', 'Page 1');
 page.selection = [];
-const store = {};
 const posted = [];
 
 global.__html__ = '';
@@ -47,10 +46,6 @@ global.figma = {
   currentPage: page,
   showUI() {},
   notify() {},
-  clientStorage: {
-    getAsync: (k) => Promise.resolve(store[k]),
-    setAsync: (k, v) => { store[k] = v; return Promise.resolve(); },
-  },
   ui: { postMessage(m) { posted.push(m); }, onmessage: null },
   on(evt, fn) { (this._handlers = this._handlers || {})[evt] = fn; },
   createRectangle() { return new Node('RECTANGLE'); },
@@ -127,6 +122,9 @@ page.appendChild(fresh);
 page.selection = [fresh];
 figma._handlers.selectionchange();
 a.strictEqual(posted[posted.length - 1].stamped, false);
+// …and reports no settings, so the panel starts from its own defaults rather
+// than inheriting whatever the last stamped frame happened to use.
+a.strictEqual(posted[posted.length - 1].opts, null);
 
 // A stamp built by the version before role tags existed: re-running has to
 // re-cut it, not treat the untagged perforation as the user's artwork.

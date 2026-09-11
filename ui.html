@@ -1,50 +1,97 @@
 <meta charset="utf-8">
 <style>
+  /* ── Stepwise UI, ported ──────────────────────────────────────────────────
+     ui.stepwise.studio is React + Tailwind and Figma inlines a single HTML
+     file, so the components are reproduced here as plain CSS rather than
+     pulled in as dependencies. Geometry, colour, type and motion are taken
+     from the library source; only the scale is adapted, because a 300px plugin
+     panel is not an app layout. Deviations are called out where they happen. */
   :root {
-    --bg: var(--figma-color-bg, #fff);
-    --bg-sunken: var(--figma-color-bg-secondary, #f5f5f5);
-    --text: var(--figma-color-text, #1e1e1e);
-    --text-dim: var(--figma-color-text-secondary, #8c8c8c);
-    --border: var(--figma-color-border, #e6e6e6);
-    --brand: var(--figma-color-bg-brand, #0d99ff);
-    --brand-text: var(--figma-color-text-onbrand, #fff);
+    /* zinc, the neutral ramp Stepwise builds on */
+    --zinc-50: #fafafa;  --zinc-100: #f4f4f5; --zinc-200: #e4e4e7;
+    --zinc-300: #d4d4d8; --zinc-400: #a1a1aa; --zinc-500: #71717a;
+    --zinc-600: #52525b; --zinc-700: #3f3f46; --zinc-800: #27272a;
+    --zinc-900: #18181b;
+
+    /* Stepwise spends its accent on sky-500 and keeps the primary action near
+       black. This panel already carries the logo gradient, so the accent is the
+       brand blue instead — the structure is Stepwise, the colour is ours. */
+    --accent: #2F6BEA;
+    --accent-ring: rgb(47 107 234 / .38);
+
+    /* Stepwise ships every border through var() with its own fallback. */
+    --ui-border: rgb(138 138 141 / 0.23);
+
+    --surface: var(--figma-color-bg, #fff);
+    --ink: var(--zinc-900);
+    --ink-dim: var(--zinc-500);
+    --track: var(--zinc-100);
+    --fill: var(--accent);
+    /* White in both themes, like the toggle knob — the slider is that same
+       nested-knob capsule, just extended. */
+    --knob: #fff;
+    --hover: var(--zinc-100);
+    --off: rgb(228 228 231 / .8);
+
+    /* From the logo — same two stops, same 45° axis. */
+    --brand-lo: #5492F7;
+    --brand-hi: #1D4ED8;
+
+    /* @theme tokens, verbatim */
+    --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+    --ease-smooth: cubic-bezier(.4, 0, .2, 1);
+    --ease-snappy: cubic-bezier(.2, 0, 0, 1);
+    --dur-interaction: 150ms;
+    --dur-transition: 200ms;
+
+    --knob-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+  }
+
+  /* Figma has no .dark class — it's derived from --figma-color-bg luminance. */
+  .dark {
+    --ink: var(--zinc-100);
+    --ink-dim: var(--zinc-400);
+    --track: #27272a;
+    --hover: var(--zinc-800);
+    --off: rgb(63 63 70 / .7);
+    --ui-border: rgb(255 255 255 / 0.12);
   }
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    padding: 12px;
-    background: var(--bg);
-    color: var(--text);
-    font: 11px/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 14px;
+    background: var(--surface);
+    color: var(--ink);
+    font: 500 12px/1.35 "Inter Display", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    /* Stepwise sets these globally; the character variants are what make Inter
+       read as Inter Display rather than plain Inter. */
+    letter-spacing: -.03em;
+    font-feature-settings: "ss03" 1, "ss07" 1, "ss08" 1, "cv01" 1, "cv02" 1,
+      "cv03" 1, "cv04" 1, "cv05" 1, "cv09" 1, "cv10" 1, "cv11" 1, "cv12" 1, "cv13" 1;
     -webkit-font-smoothing: antialiased;
     user-select: none;
   }
 
-  /* --- preview ---
-     Checkerboard, not a flat fill: the perforations are genuinely cut out, and
-     the checker is what makes that legible instead of looking like paint. */
+  :focus-visible { outline: none; }
+
+  /* ── stage ──────────────────────────────────────────────────────────────── */
   .stage {
     position: relative;
-    height: 172px;
+    height: 176px;
     display: grid;
     place-items: center;
-    padding: 14px;
-    border-radius: 8px;
+    padding: 18px;
+    border-radius: 14px;
     overflow: hidden;
-    background-color: #b9b9b9;
-    background-image:
-      linear-gradient(45deg, #a8a8a8 25%, transparent 25%, transparent 75%, #a8a8a8 75%),
-      linear-gradient(45deg, #a8a8a8 25%, transparent 25%, transparent 75%, #a8a8a8 75%);
-    background-size: 12px 12px;
-    background-position: 0 0, 6px 6px;
+    background: linear-gradient(135deg, var(--brand-lo) 0%, var(--brand-hi) 100%);
   }
-  .stage::after { /* hairline that survives both themes */
+  .stage::after {
     content: "";
     position: absolute; inset: 0;
-    border-radius: 8px;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14);
+    border-radius: 14px;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / .16);
     pointer-events: none;
   }
   .stage svg { max-width: 100%; max-height: 100%; display: block; }
@@ -53,138 +100,297 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    margin: 7px 1px 0;
-    color: var(--text-dim);
+    margin: 11px 2px 0;
+    color: var(--ink-dim);
+    font-size: 11px;
     font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
   }
-  .meta b { font-weight: 500; color: var(--text); }
-  /* Lit when the sliders were recalled from the frame's own saved settings. */
-  #meta-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+  .meta b { font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
+  #meta-dot { flex: none; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
   #meta-sel { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  #meta-sel.empty { font-style: italic; }
+  #meta-sel.empty { font-style: italic; opacity: .75; }
   #meta-out { flex: none; }
 
-  /* --- rows --- */
   .section {
-    margin: 12px 1px 2px;
-    color: var(--text-dim);
+    margin: 18px 2px 8px;
+    color: var(--ink-dim);
     font-size: 10px;
     font-weight: 600;
     letter-spacing: .06em;
     text-transform: uppercase;
+    opacity: .7;
   }
-  .row { display: flex; align-items: center; height: 28px; gap: 8px; }
-  .row > .label { width: 74px; color: var(--text-dim); flex: none; }
 
-  input[type=range] {
-    flex: 1;
-    -webkit-appearance: none;
-    height: 18px;
-    background: transparent;
-    margin: 0;
-    cursor: grab;
-  }
-  input[type=range]:active { cursor: grabbing; }
-  input[type=range]::-webkit-slider-runnable-track {
-    height: 2px;
-    border-radius: 2px;
-    background: var(--border);
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 11px;
-    height: 11px;
-    margin-top: -4.5px;
-    border-radius: 50%;
-    background: var(--bg);
-    border: 1px solid var(--text-dim);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
-    transition: border-color .12s, transform .12s;
-  }
-  input[type=range]:hover::-webkit-slider-thumb { border-color: var(--brand); }
-  input[type=range]:active::-webkit-slider-thumb { border-color: var(--brand); transform: scale(1.15); }
-
-  .num {
-    width: 40px;
+  .row { display: flex; align-items: center; height: 32px; gap: 10px; }
+  .row > .label {
+    width: 70px;
     flex: none;
-    height: 24px;
-    padding: 0 6px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    background: transparent;
-    color: var(--text);
-    font: inherit;
-    font-variant-numeric: tabular-nums;
-    text-align: right;
-    outline: none;
+    color: var(--ink-dim);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -.01em;
+    white-space: nowrap;
   }
-  .num:hover { border-color: var(--border); }
-  .num:focus { border-color: var(--brand); background: var(--bg); }
+  .row > .label.inline { width: auto; }
 
-  /* --- color + switch --- */
-  .swatch {
-    width: 24px;
+  /* ── slider ───────────────────────────────────────────────────────────────
+     Stepwise "classical": a 24px capsule track with a nested round knob, equal
+     4px gap on all four sides, knob = track − 2×gap. The fill is a capsule too
+     so it wraps the knob instead of butting into it. The native range input
+     sits transparent on top, so keyboard support and a11y come for free while
+     the divs carry the look. */
+  .slider {
+    position: relative;
+    flex: 1;
     height: 24px;
-    padding: 0;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    background: none;
-    cursor: pointer;
-    overflow: hidden;
+    border-radius: 999px;
+    background: var(--track);
+    /* Knob travel in whole pixels, set from sync(). A 16px circle sitting on a
+       fractional offset antialiases into a soft edge — the toggle knob stays
+       crisp precisely because it moves by an integer translate. */
+    --x: 0px;
   }
-  .swatch::-webkit-color-swatch-wrapper { padding: 2px; }
-  .swatch::-webkit-color-swatch { border: none; border-radius: 3px; }
-  .hexval { color: var(--text-dim); font-variant-numeric: tabular-nums; }
-
-  .switch { margin-left: auto; position: relative; width: 30px; height: 18px; flex: none; }
-  .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
-  .track {
+  .slider input {
     position: absolute; inset: 0;
-    border-radius: 9px;
-    background: var(--border);
-    transition: background .15s;
+    width: 100%; height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+  .s-fill {
+    position: absolute;
+    left: 4px; top: 4px;
+    height: 16px;
+    width: calc(var(--x) + 16px);
+    border-radius: 999px;
+    background: var(--fill);
     pointer-events: none;
   }
-  .track::after {
-    content: "";
-    position: absolute; top: 2px; left: 2px;
+  .s-knob {
+    position: absolute;
+    top: 4px; left: 4px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--knob);
+    box-shadow: var(--knob-shadow);
+    pointer-events: none;
+    transform: translateX(var(--x));
+  }
+  .slider input:focus-visible ~ .s-knob { box-shadow: var(--knob-shadow), 0 0 0 3px var(--accent-ring); }
+
+  /* ── value field ──────────────────────────────────────────────────────────
+     Stepwise's QtyInput is a ± stepper — two 32px buttons plus digits, which
+     doesn't fit a 300px row that already carries a label and a slider. This
+     keeps that component's type treatment and hover surface, and scrubs
+     sideways instead of stepping. */
+  .num {
+    width: 40px; height: 26px;
+    flex: none;
+    padding: 0 2px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em;
+    text-align: center;
+    outline: none;
+    cursor: ew-resize;
+    transition: background var(--dur-interaction) var(--ease-smooth);
+  }
+  .num:hover { background: var(--hover); }
+  .num:focus { cursor: text; background: var(--hover); box-shadow: 0 0 0 2px var(--accent-ring); }
+  .num::-webkit-inner-spin-button, .num::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* ── colour ───────────────────────────────────────────────────────────── */
+  .picker-row { position: relative; }
+  .swatch {
+    width: 26px; height: 26px;
+    flex: none;
+    padding: 3px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--ui-border);
+    cursor: pointer;
+    transition: transform var(--dur-interaction) var(--ease-snappy);
+  }
+  .swatch:active { transform: scale(.94); }
+  #swatch-chip { display: block; width: 100%; height: 100%; border-radius: 6px; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .14); }
+  .hexval {
+    flex: 1;
+    color: var(--ink-dim);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+    cursor: pointer;
+  }
+
+  /* Stepwise modal motion: 250ms, scale .96, cubic-bezier(.22,1,.36,1).
+     Opens upward — the row sits low enough that downward would be clipped. */
+  .popover {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    width: 230px;
+    padding: 12px;
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--ui-border), 0 12px 32px rgb(16 24 40 / .16), 0 2px 6px rgb(16 24 40 / .1);
+    z-index: 20;
+    transform-origin: bottom right;
+    animation: pop 250ms cubic-bezier(.22, 1, .36, 1);
+  }
+  @keyframes pop { from { opacity: 0; transform: scale(.96) translateY(6px); } }
+
+  .sv {
+    position: relative;
+    height: 132px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: crosshair;
+    touch-action: none;
+    box-shadow: inset 0 0 0 1px var(--ui-border);
+  }
+  .sv i { position: absolute; inset: 0; display: block; }
+  .sv .tint { background: linear-gradient(to right, #fff, rgb(255 255 255 / 0)); }
+  .sv .shade { background: linear-gradient(to top, #000, rgb(0 0 0 / 0)); }
+  .knob {
+    position: absolute;
     width: 14px; height: 14px;
     border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
-    transition: transform .15s cubic-bezier(.2, .8, .3, 1);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / .35), var(--knob-shadow);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
   }
-  .switch input:checked + .track { background: var(--brand); }
-  .switch input:checked + .track::after { transform: translateX(12px); }
 
-  /* --- footer --- */
-  footer { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
-  .actions { display: flex; justify-content: space-between; margin-top: 2px; }
-  .btn {
-    flex: 1;
-    height: 32px;
+  .hue {
+    position: relative;
+    height: 12px;
+    margin-top: 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    touch-action: none;
+    box-shadow: inset 0 0 0 1px var(--ui-border);
+    background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+  }
+  .hue .knob {
+    top: 50%;
+    width: 16px; height: 16px;
+    background: #fff;
     border: 0;
-    border-radius: 6px;
-    background: var(--brand);
-    color: var(--brand-text);
-    font: inherit;
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / .18), 0 1px 3px rgb(0 0 0 / .3);
+  }
+
+  .hex {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    height: 28px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--ui-border);
+    color: var(--ink);
+    font-family: inherit;
     font-weight: 600;
-    cursor: pointer;
-    transition: filter .12s;
+    font-size: 12px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+    text-transform: uppercase;
+    outline: none;
+    transition: box-shadow var(--dur-interaction) var(--ease-smooth);
   }
-  .btn:hover { filter: brightness(1.08); }
-  .btn:active { filter: brightness(.94); }
-  .btn:disabled { background: var(--border); color: var(--text-dim); cursor: default; filter: none; }
-  .link {
+  .hex:focus { box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 3px var(--accent-ring); }
+  /* ── toggle ───────────────────────────────────────────────────────────────
+     Stepwise sm: 36×22, gap 3, knob = h − 2×gap = 16, travel = w − knob − 2×gap.
+     The knob squashes 12% along its travel axis and settles on a spring, so the
+     flip has weight rather than snapping. */
+  .sw {
+    position: relative;
+    width: 36px; height: 22px;
+    flex: none;
+    border-radius: 999px;
+    background: var(--off);
+    transition: background var(--dur-transition) var(--ease-smooth);
+  }
+  .sw input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .sw-knob {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: var(--knob-shadow);
+    pointer-events: none;
+    transition: transform 340ms var(--ease-spring);
+  }
+  .sw:has(input:checked) { background: var(--accent); }
+  .sw input:checked ~ .sw-knob { transform: translateX(14px); }
+  .sw input:focus-visible ~ .sw-knob { box-shadow: var(--knob-shadow), 0 0 0 3px var(--accent-ring); }
+  .sw-knob.flip { animation: squash 220ms ease-out; }
+  @keyframes squash { 0% { scale: 1 1; } 50% { scale: 1.12 1; } 100% { scale: 1 1; } }
+
+  /* ── button ───────────────────────────────────────────────────────────────
+     Stepwise solid at default size: h-9, pill radius (height ÷ 2), a hairline
+     edge and a press scale. Flat accent, not the logo gradient — the gradient
+     is the stage's alone, and repeating it here spends it twice. This is the
+     same accent the sliders and toggle already use. */
+  footer { margin-top: 18px; }
+  .btn {
+    width: 100%;
+    height: 36px;
     border: 0;
-    background: none;
-    color: var(--text-dim);
-    font: inherit;
+    border-radius: 18px;
+    background: var(--accent);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / .1), 0 1px 2px rgb(16 33 74 / .16);
+    color: #fff;
+    font-family: inherit;
+    font-weight: 550;
+    font-size: 14px;
+    line-height: 1.2;
+    letter-spacing: -.01em;
     cursor: pointer;
-    padding: 6px;
+    transition: filter var(--dur-interaction) var(--ease-smooth), transform 75ms var(--ease-snappy);
   }
-  .link:hover:enabled { color: var(--text); }
-  .link:disabled { opacity: .4; cursor: default; }
+  .btn:hover:enabled { filter: brightness(1.08); }
+  .btn:active:enabled { transform: scale(.985); filter: brightness(.95); }
+  .btn:disabled {
+    background: var(--track);
+    box-shadow: inset 0 0 0 1px var(--ui-border);
+    color: var(--ink-dim);
+    cursor: default;
+  }
+
+  /* Stepwise ghost at sm: transparent, zinc-700 text, h-7. */
+  .actions { display: flex; justify-content: space-between; margin-top: 8px; }
+  .link {
+    height: 28px;
+    padding: 0 10px;
+    margin: 0 -10px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--ink-dim);
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: -.01em;
+    cursor: pointer;
+    transition: color var(--dur-interaction) var(--ease-smooth), background var(--dur-interaction) var(--ease-smooth);
+  }
+  .link:hover:enabled { color: var(--ink); background: var(--hover); }
+  .link:disabled { opacity: .3; cursor: default; }
 </style>
 
 <div class="stage"><svg id="pv" preserveAspectRatio="xMidYMid meet"></svg></div>
@@ -196,24 +402,44 @@
 
 <div class="section">Perforation</div>
 <div class="row"><span class="label">Padding</span>
-  <input type="range" id="pad" min="0" max="120" value="28"><input class="num" id="pad-n" type="number"></div>
+  <span class="slider" id="pad-s"><span class="s-fill"></span><span class="s-knob"></span>
+    <input type="range" id="pad" min="0" max="120" value="20" aria-label="Padding"></span>
+  <input class="num" id="pad-n" type="text" inputmode="numeric"></div>
 <div class="row"><span class="label">Perf size</span>
-  <input type="range" id="perf" min="1" max="40" value="9"><input class="num" id="perf-n" type="number"></div>
+  <span class="slider" id="perf-s"><span class="s-fill"></span><span class="s-knob"></span>
+    <input type="range" id="perf" min="1" max="40" value="8" aria-label="Perf size"></span>
+  <input class="num" id="perf-n" type="text" inputmode="numeric"></div>
 <div class="row"><span class="label">Perf spacing</span>
-  <input type="range" id="spacing" min="4" max="120" value="22"><input class="num" id="spacing-n" type="number"></div>
+  <span class="slider" id="spacing-s"><span class="s-fill"></span><span class="s-knob"></span>
+    <input type="range" id="spacing" min="4" max="120" value="25" aria-label="Perf spacing"></span>
+  <input class="num" id="spacing-n" type="text" inputmode="numeric"></div>
 <div class="row"><span class="label">Corner</span>
-  <input type="range" id="radius" min="0" max="60" value="0"><input class="num" id="radius-n" type="number"></div>
+  <span class="slider" id="radius-s"><span class="s-fill"></span><span class="s-knob"></span>
+    <input type="range" id="radius" min="0" max="60" value="0" aria-label="Corner radius"></span>
+  <input class="num" id="radius-n" type="text" inputmode="numeric"></div>
 
 <div class="section">Paper</div>
-<div class="row"><span class="label">Fill</span>
-  <input class="swatch" type="color" id="color" value="#FFFFFF">
-  <span class="hexval" id="hexval">#FFFFFF</span></div>
-<div class="row"><span class="label">Shadow</span>
-  <label class="switch"><input type="checkbox" id="shadow" checked><span class="track"></span></label></div>
+<div class="row picker-row">
+  <span class="label inline">Fill</span>
+  <button class="swatch" id="swatch" aria-haspopup="dialog" aria-expanded="false" aria-label="Paper colour">
+    <span id="swatch-chip"></span>
+  </button>
+  <span class="hexval" id="hexval">#FFFFFF</span>
 
-<footer>
-  <button class="btn" id="apply">Apply to selection</button>
-</footer>
+  <div class="popover" id="picker" role="dialog" aria-label="Paper colour" hidden>
+    <div class="sv" id="sv">
+      <i class="tint"></i><i class="shade"></i>
+      <span class="knob" id="sv-knob"></span>
+    </div>
+    <div class="hue" id="hue"><span class="knob" id="hue-knob"></span></div>
+    <input class="hex" id="hex" spellcheck="false" maxlength="7" aria-label="Hex value">
+  </div>
+
+  <span class="label inline">Shadow</span>
+  <label class="sw"><input type="checkbox" id="shadow" checked aria-label="Drop shadow"><span class="sw-knob"></span></label>
+</div>
+
+<footer><button class="btn" id="apply">Apply to selection</button></footer>
 <div class="actions">
   <button class="link" id="remove" disabled>Remove stamp</button>
   <button class="link" id="reset">Reset settings</button>
@@ -222,32 +448,111 @@
 <script>
   const $ = (id) => document.getElementById(id);
   const SLIDERS = ['pad', 'perf', 'spacing', 'radius'];
+  const DEFAULTS = { pad: 20, perf: 8, spacing: 25, radius: 0, color: '#FFFFFF', shadow: true };
 
-  const DEFAULTS = { pad: 28, perf: 9, spacing: 22, radius: 0, color: '#FFFFFF', shadow: true };
-
-  // The selected frame, as reported by code.js — null when nothing is selected,
-  // in which case the preview falls back to a stand-in.
   let sel = null;
   let selId = null;
+  let color = DEFAULTS.color;
   const STANDIN = { w: 400, h: 260 };
 
+  const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+
+  // --- theme --------------------------------------------------------------
+  // Stepwise themes off a .dark class and Figma never sets one, so it's derived
+  // from the luminance of Figma's own background token. Figma rewrites those
+  // vars inline on <html> when the user switches theme, so watch for it.
+  function syncTheme() {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;background:var(--figma-color-bg,#fff)';
+    document.body.appendChild(probe);
+    const rgb = (getComputedStyle(probe).backgroundColor.match(/\d+/g) || [255, 255, 255]).map(Number);
+    probe.remove();
+    const lum = (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255;
+    document.documentElement.classList.toggle('dark', lum < 0.5);
+  }
+  new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class'] });
+
+  // --- colour maths --------------------------------------------------------
+  function hexToRgb(h) {
+    const n = parseInt(h.replace('#', ''), 16);
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+  }
+  function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map((v) => clamp(Math.round(v), 0, 255).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+  function rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    let h = 0;
+    if (d) {
+      if (mx === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (mx === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return { h: h, s: mx ? d / mx : 0, v: mx };
+  }
+  function hsvToRgb(h, s, v) {
+    const c = v * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = v - c;
+    const t = [[c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x]][Math.floor(h / 60) % 6];
+    return { r: (t[0] + m) * 255, g: (t[1] + m) * 255, b: (t[2] + m) * 255 };
+  }
+
+  let hsv = { h: 0, s: 0, v: 1 };
+
+  // --- state ---------------------------------------------------------------
   function opts() {
-    const o = { color: $('color').value, shadow: $('shadow').checked };
+    const o = { color: color, shadow: $('shadow').checked };
     for (const id of SLIDERS) o[id] = +$(id).value;
     return o;
   }
 
   function setOpts(o) {
     for (const id of SLIDERS) if (o[id] != null) $(id).value = o[id];
-    if (o.color) $('color').value = o.color;
+    if (o.color) setColor(o.color, true);
     if (o.shadow != null) $('shadow').checked = o.shadow;
   }
 
-  // Keep number boxes, hex label, readout and preview in step.
+  // resync skips recomputing HSV from the hex, so dragging through pure black or
+  // white doesn't throw away the hue the user had picked.
+  function setColor(next, resync) {
+    color = next.toUpperCase();
+    if (resync) {
+      const c = hexToRgb(color);
+      hsv = rgbToHsv(c.r, c.g, c.b);
+    }
+    $('swatch-chip').style.background = color;
+    $('hexval').textContent = color;
+    if (document.activeElement !== $('hex')) $('hex').value = color;
+    paintPicker();
+  }
+
+  function paintPicker() {
+    const pure = hsvToRgb(hsv.h, 1, 1);
+    $('sv').style.background = rgbToHex(pure.r, pure.g, pure.b);
+    $('sv-knob').style.left = hsv.s * 100 + '%';
+    $('sv-knob').style.top = (1 - hsv.v) * 100 + '%';
+    $('sv-knob').style.background = color;
+    $('hue-knob').style.left = (hsv.h / 360) * 100 + '%';
+  }
+
+  function commitHsv() {
+    const c = hsvToRgb(hsv.h, hsv.s, hsv.v);
+    setColor(rgbToHex(c.r, c.g, c.b), false);
+    sync();
+  }
+
+  // Keep the value fields, slider capsules, readout and preview in step.
   function sync() {
     const o = opts();
-    for (const id of SLIDERS) $(id + '-n').value = o[id];
-    $('hexval').textContent = o.color.toUpperCase();
+    for (const id of SLIDERS) {
+      const el = $(id), box = $(id + '-n'), track = $(id + '-s');
+      if (document.activeElement !== box) box.value = o[id];
+      // Rounded to whole pixels — see --x. Usable travel is the track minus the
+      // knob and the gap either side.
+      const t = (o[id] - el.min) / (el.max - el.min);
+      track.style.setProperty('--x', Math.round(t * Math.max(0, track.clientWidth - 24)) + 'px');
+    }
 
     const frame = sel || STANDIN;
     const w = frame.w + o.pad * 2, h = frame.h + o.pad * 2;
@@ -259,43 +564,6 @@
 
   function counts(w, h, spacing) {
     return [Math.max(1, Math.round(w / spacing)), Math.max(1, Math.round(h / spacing))];
-  }
-
-  // The printed panel, laid out in the frame's own coordinates. A fixed viewBox
-  // would have to either letterbox or crop — and cropping eats the lettering on
-  // square-ish frames — so every element is placed as a fraction of w and h.
-  // Circles and birds key off min(w, h) so they stay round on extreme shapes.
-  function vignette(x, y, w, h) {
-    const ink = '#33413f', paper = '#ece5d5';
-    const u = Math.min(w, h);
-    const bh = Math.max(10, Math.min(h * 0.13, 46));        // caption band
-    const gy = h - bh;                                      // ground line
-    const r = u * 0.09;                                     // sun
-    const px = w * 0.6, py = h * 0.28;                      // main peak
-    const bl = w * 0.26, br = w * 0.96;                     // and its base
-    const t = 0.74;                                         // snow line, up the slope
-    const sy = py + (gy - py) * (1 - t);
-    const bird = u * 0.035;
-    const cap = Math.max(5, Math.min(bh * 0.46, w * 0.055));
-    const num = h * 0.17;
-    const arc = (bx, by) => `M${bx} ${by} q${bird} ${-bird} ${bird * 2} 0`;
-    return (
-      `<g transform="translate(${x} ${y})">` +
-      `<rect width="${w}" height="${h}" fill="${paper}"/>` +
-      `<circle cx="${w - r - w * 0.09}" cy="${r + h * 0.09}" r="${r}" fill="#c2593c" opacity=".9"/>` +
-      `<path d="M${w * 0.01} ${gy} L${w * 0.24} ${h * 0.46} L${w * 0.52} ${gy} Z" fill="${ink}" opacity=".5"/>` +
-      `<path d="M${bl} ${gy} L${px} ${py} L${br} ${gy} Z" fill="${ink}"/>` +
-      `<path d="M${px} ${py} L${br + (px - br) * t} ${sy} L${bl + (px - bl) * t} ${sy} Z"` +
-      ` fill="${paper}" opacity=".92"/>` +
-      `<path d="${arc(w * 0.3, h * 0.2)} ${arc(w * 0.4, h * 0.14)}" fill="none" stroke="${ink}"` +
-      ` stroke-width="${Math.max(1, u * 0.012)}" stroke-linecap="round" opacity=".45"/>` +
-      `<text x="${w * 0.045}" y="${h * 0.06 + num}" font-size="${num}" font-weight="700"` +
-      ` fill="${ink}" font-family="Georgia, 'Times New Roman', serif">25</text>` +
-      `<rect y="${gy}" width="${w}" height="${bh}" fill="${ink}"/>` +
-      `<text x="${w * 0.035}" y="${h - bh * 0.33}" font-size="${cap}" fill="${paper}"` +
-      ` letter-spacing="${cap * 0.22}" font-family="Georgia, 'Times New Roman', serif">STAMP BORDER</text>` +
-      `</g>`
-    );
   }
 
   // Mirrors holeCenters() in code.js — no bundler here, so the loop is repeated.
@@ -317,34 +585,137 @@
     $('pv').setAttribute('viewBox', `${-m} ${-m} ${w + m * 2} ${h + m * 2}`);
     $('pv').innerHTML =
       `<defs>` +
-      `<filter id="sh" x="-25%" y="-25%" width="150%" height="150%">` +
-      `<feDropShadow dx="0" dy="4" stdDeviation="7" flood-opacity=".4"/></filter>` +
+      `<filter id="sh" x="-28%" y="-28%" width="156%" height="156%">` +
+      `<feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity=".3"/></filter>` +
       `<mask id="m">` +
       `<rect width="${w}" height="${h}" rx="${o.radius}" fill="#fff"/>` +
       `<g fill="#000">${cut}</g></mask>` +
-      `<clipPath id="c">` +
-      `<rect width="${w}" height="${h}" rx="${o.radius}"/></clipPath>` +
+      `<clipPath id="c"><rect width="${w}" height="${h}" rx="${o.radius}"/></clipPath>` +
       `</defs>` +
       `<g${o.shadow ? ' filter="url(#sh)"' : ''}>` +
       `<g mask="url(#m)">` +
       `<rect width="${w}" height="${h}" rx="${o.radius}" fill="${o.color}"/>` +
-      `<g clip-path="url(#c)">${vignette(o.pad, o.pad, frame.w, frame.h)}</g>` +
-      `</g></g>`;
+      // Your frame stands in as a plain black panel — the paper defaults to
+      // white, so black is what actually reads against it.
+      `<g clip-path="url(#c)">` +
+      `<rect x="${o.pad}" y="${o.pad}" width="${frame.w}" height="${frame.h}" fill="#000000"/>` +
+      `</g></g></g>`;
   }
 
   function send(type) {
     parent.postMessage({ pluginMessage: { type: type, opts: opts() } }, '*');
   }
 
+  // --- drag helper ---------------------------------------------------------
+  function drag(el, onMove, onUp) {
+    el.addEventListener('pointerdown', (e) => {
+      // Capture keeps the drag alive outside the element. It can throw for a
+      // pointer the element never saw, and losing it must not cost us the
+      // interaction, so it never gates the move.
+      try { el.setPointerCapture(e.pointerId); } catch (err) { /* drag still works */ }
+      onMove(e, true);
+      const move = (ev) => onMove(ev, false);
+      const up = (ev) => {
+        el.removeEventListener('pointermove', move);
+        el.removeEventListener('pointerup', up);
+        if (onUp) onUp(ev);
+      };
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', up);
+    });
+  }
+
+  // --- scrubbable value fields ---------------------------------------------
+  function scrub(id) {
+    const range = $(id), box = $(id + '-n');
+    let x0 = 0, v0 = 0, moved = false;
+
+    drag(box, (e, first) => {
+      if (document.activeElement === box) return; // already typing
+      if (first) { x0 = e.clientX; v0 = +range.value; moved = false; e.preventDefault(); return; }
+      const dx = e.clientX - x0;
+      if (Math.abs(dx) > 2) moved = true;
+      const next = clamp(Math.round(v0 + dx / 3), +range.min, +range.max);
+      if (next !== +range.value) { range.value = next; sync(); }
+    }, () => {
+      if (!moved && document.activeElement !== box) { box.focus(); box.select(); }
+    });
+
+    const commit = () => {
+      const v = parseFloat(box.value);
+      if (isFinite(v)) range.value = clamp(v, +range.min, +range.max);
+      sync();
+    };
+    box.addEventListener('blur', commit);
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { commit(); box.blur(); return; }
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      range.value = clamp(+range.value + (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1), +range.min, +range.max);
+      sync();
+    });
+  }
+
+  // --- picker interaction --------------------------------------------------
+  drag($('sv'), (e) => {
+    const r = $('sv').getBoundingClientRect();
+    hsv.s = clamp((e.clientX - r.left) / r.width, 0, 1);
+    hsv.v = 1 - clamp((e.clientY - r.top) / r.height, 0, 1);
+    commitHsv();
+  });
+
+  drag($('hue'), (e) => {
+    const r = $('hue').getBoundingClientRect();
+    hsv.h = clamp((e.clientX - r.left) / r.width, 0, 1) * 360;
+    commitHsv();
+  });
+
+  $('hex').onchange = $('hex').onblur = (e) => {
+    const v = e.target.value.trim().replace(/^#/, '');
+    const full = v.length === 3 ? v.split('').map((c) => c + c).join('') : v;
+    if (/^[0-9a-f]{6}$/i.test(full)) { setColor('#' + full, true); sync(); }
+    else e.target.value = color;
+  };
+
+  function openPicker(open) {
+    $('picker').hidden = !open;
+    $('swatch').setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) paintPicker();
+  }
+  $('swatch').onclick = (e) => { e.stopPropagation(); openPicker($('picker').hidden); };
+  $('hexval').onclick = (e) => { e.stopPropagation(); openPicker($('picker').hidden); };
+  $('picker').onclick = (e) => e.stopPropagation();
+  document.addEventListener('click', () => openPicker(false));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') openPicker(false); });
+
+  // The EyeDropper API is Chromium-only and needs a secure context with user
+  // activation, neither of which is guaranteed inside a sandboxed plugin
+  // iframe. Feature-detect to show it; if open() rejects for anything other
+  // than the user dismissing it, say so and retire the button rather than
+  // leaving a control that silently does nothing.
+  // No screen eyedropper: the browser's EyeDropper API needs a secure context
+  // with user activation and Figma runs plugin UI in a sandboxed null-origin
+  // iframe, so it only ever refused. There's no plugin API for it either.
+
+  // --- wiring --------------------------------------------------------------
   // The controls drive the preview and nothing else. Rebuilding the canvas on
   // every input meant the plugin edited the document without being asked and
   // buried the undo stack under a step per slider tick.
   for (const id of SLIDERS) {
     $(id).oninput = sync;
-    $(id + '-n').onchange = (e) => { $(id).value = e.target.value; sync(); };
+    scrub(id);
   }
-  $('color').oninput = sync;
-  $('shadow').onchange = sync;
+
+  const knob = document.querySelector('.sw-knob');
+  $('shadow').onchange = () => {
+    // The squash is feedback for a real flip, so it's driven by the event
+    // rather than living on the element from first paint.
+    knob.classList.remove('flip');
+    void knob.offsetWidth; // restart the animation
+    knob.classList.add('flip');
+    sync();
+  };
+  knob.addEventListener('animationend', () => knob.classList.remove('flip'));
 
   $('apply').onclick = () => send('apply');
   $('remove').onclick = () => send('remove');
@@ -356,9 +727,9 @@
 
     // Only adopt the reported settings when the selection actually moved to a
     // different frame. Every apply echoes back a selection, and swallowing that
-    // is what stops a mid-drag rebuild from yanking the slider out from under
-    // the cursor.
-    if (m.id !== selId && m.opts) setOpts(m.opts);
+    // is what stops a rebuild from yanking a control out from under the cursor.
+    // A frame with no stamp of its own reports none and starts from the defaults.
+    if (m.id !== selId) setOpts(m.opts || DEFAULTS);
     selId = m.id;
     sel = m.count ? { w: m.w, h: m.h } : null;
 
@@ -373,6 +744,8 @@
     sync();
   };
 
+  syncTheme();
+  setColor(color, true);
   sync();
   parent.postMessage({ pluginMessage: { type: 'ready' } }, '*');
 </script>
