@@ -1,0 +1,301 @@
+<style>
+  :root {
+    --bg: var(--figma-color-bg, #fff);
+    --bg-sunken: var(--figma-color-bg-secondary, #f5f5f5);
+    --text: var(--figma-color-text, #1e1e1e);
+    --text-dim: var(--figma-color-text-secondary, #8c8c8c);
+    --border: var(--figma-color-border, #e6e6e6);
+    --brand: var(--figma-color-bg-brand, #0d99ff);
+    --brand-text: var(--figma-color-text-onbrand, #fff);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 12px;
+    background: var(--bg);
+    color: var(--text);
+    font: 11px/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  /* --- preview --- */
+  .preview {
+    height: 168px;
+    display: grid;
+    place-items: center;
+    padding: 14px;
+    border-radius: 8px;
+    background: #111;
+    overflow: hidden;
+  }
+  .preview svg { max-width: 100%; max-height: 100%; display: block; }
+
+  /* --- presets --- */
+  .presets { display: flex; gap: 4px; margin: 12px 0; }
+  .chip {
+    flex: 1;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .chip:hover { background: var(--bg-sunken); color: var(--text); }
+  .chip[aria-pressed="true"] {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-text);
+  }
+
+  /* --- rows --- */
+  .row { display: flex; align-items: center; height: 28px; gap: 8px; }
+  .row > .label { width: 74px; color: var(--text-dim); flex: none; }
+
+  input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 18px;
+    background: transparent;
+    margin: 0;
+    cursor: grab;
+  }
+  input[type=range]:active { cursor: grabbing; }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 2px;
+    border-radius: 2px;
+    background: var(--border);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 11px;
+    height: 11px;
+    margin-top: -4.5px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--text-dim);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    transition: border-color .12s;
+  }
+  input[type=range]:hover::-webkit-slider-thumb,
+  input[type=range]:active::-webkit-slider-thumb { border-color: var(--brand); }
+
+  .num {
+    width: 40px;
+    flex: none;
+    height: 24px;
+    padding: 0 6px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    outline: none;
+  }
+  .num:hover { border-color: var(--border); }
+  .num:focus { border-color: var(--brand); background: var(--bg); }
+
+  /* --- color + switch --- */
+  .swatch {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: none;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .swatch::-webkit-color-swatch-wrapper { padding: 2px; }
+  .swatch::-webkit-color-swatch { border: none; border-radius: 3px; }
+  .hexval { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+  .switch { margin-left: auto; position: relative; width: 30px; height: 18px; flex: none; }
+  .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+  .track {
+    position: absolute; inset: 0;
+    border-radius: 9px;
+    background: var(--border);
+    transition: background .15s;
+    pointer-events: none;
+  }
+  .track::after {
+    content: "";
+    position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+    transition: transform .15s cubic-bezier(.2, .8, .3, 1);
+  }
+  .switch input:checked + .track { background: var(--brand); }
+  .switch input:checked + .track::after { transform: translateX(12px); }
+
+  hr { border: 0; border-top: 1px solid var(--border); margin: 10px 0; }
+
+  /* --- footer --- */
+  footer { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+  .btn {
+    flex: 1;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--brand);
+    color: var(--brand-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter .12s;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:active { filter: brightness(.94); }
+  .link {
+    border: 0;
+    background: none;
+    color: var(--text-dim);
+    font: inherit;
+    cursor: pointer;
+    padding: 6px;
+  }
+  .link:hover { color: var(--text); }
+</style>
+
+<div class="preview"><svg id="pv" preserveAspectRatio="xMidYMid meet"></svg></div>
+
+<div class="presets" id="presets">
+  <button class="chip" data-preset="classic">Classic</button>
+  <button class="chip" data-preset="fine">Fine</button>
+  <button class="chip" data-preset="chunky">Chunky</button>
+  <button class="chip" data-preset="rounded">Rounded</button>
+</div>
+
+<div class="row"><span class="label">Padding</span>
+  <input type="range" id="pad" min="0" max="120" value="28"><input class="num" id="pad-n" type="number"></div>
+<div class="row"><span class="label">Perf size</span>
+  <input type="range" id="perf" min="1" max="40" value="9"><input class="num" id="perf-n" type="number"></div>
+<div class="row"><span class="label">Perf spacing</span>
+  <input type="range" id="spacing" min="4" max="120" value="22"><input class="num" id="spacing-n" type="number"></div>
+<div class="row"><span class="label">Corner</span>
+  <input type="range" id="radius" min="0" max="60" value="0"><input class="num" id="radius-n" type="number"></div>
+
+<hr>
+
+<div class="row"><span class="label">Paper</span>
+  <input class="swatch" type="color" id="color" value="#FFFFFF">
+  <span class="hexval" id="hexval">#FFFFFF</span></div>
+<div class="row"><span class="label">Shadow</span>
+  <label class="switch"><input type="checkbox" id="shadow" checked><span class="track"></span></label></div>
+
+<footer>
+  <button class="btn" id="apply">Apply to selection</button>
+  <button class="link" id="reset">Reset</button>
+</footer>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const SLIDERS = ['pad', 'perf', 'spacing', 'radius'];
+
+  const PRESETS = {
+    classic: { pad: 28, perf: 9, spacing: 22, radius: 0 },
+    fine: { pad: 20, perf: 5, spacing: 12, radius: 0 },
+    chunky: { pad: 36, perf: 16, spacing: 40, radius: 0 },
+    rounded: { pad: 30, perf: 10, spacing: 24, radius: 16 },
+  };
+
+  function opts() {
+    const o = { color: $('color').value, shadow: $('shadow').checked };
+    for (const id of SLIDERS) o[id] = +$(id).value;
+    return o;
+  }
+
+  function setOpts(o) {
+    for (const id of SLIDERS) if (o[id] != null) $(id).value = o[id];
+    if (o.color) $('color').value = o.color;
+    if (o.shadow != null) $('shadow').checked = o.shadow;
+  }
+
+  // Keep number boxes, hex label, preset highlight and preview in step.
+  function sync() {
+    const o = opts();
+    for (const id of SLIDERS) $(id + '-n').value = o[id];
+    $('hexval').textContent = o.color.toUpperCase();
+    for (const chip of $('presets').children) {
+      const p = PRESETS[chip.dataset.preset];
+      chip.setAttribute('aria-pressed', SLIDERS.every((k) => p[k] === o[k]));
+    }
+    drawPreview(o);
+  }
+
+  // Preview stands in for a 400x260 frame; the SVG viewBox does the scaling.
+  // Mirrors holeCenters() in code.js — no bundler here, so the loop is repeated.
+  function drawPreview(o) {
+    const FW = 400, FH = 260;
+    const w = FW + o.pad * 2, h = FH + o.pad * 2;
+    const nx = Math.max(1, Math.round(w / o.spacing));
+    const ny = Math.max(1, Math.round(h / o.spacing));
+    let cut = '';
+    for (let i = 0; i < nx; i++) {
+      const cx = ((i + 0.5) * w) / nx;
+      cut += `<circle cx="${cx}" cy="0" r="${o.perf}"/><circle cx="${cx}" cy="${h}" r="${o.perf}"/>`;
+    }
+    for (let i = 0; i < ny; i++) {
+      const cy = ((i + 0.5) * h) / ny;
+      cut += `<circle cx="0" cy="${cy}" r="${o.perf}"/><circle cx="${w}" cy="${cy}" r="${o.perf}"/>`;
+    }
+    const shadow = o.shadow
+      ? '<filter id="sh" x="-20%" y="-20%" width="140%" height="140%">' +
+        '<feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.45"/></filter>'
+      : '';
+    $('pv').setAttribute('viewBox', `-14 -14 ${w + 28} ${h + 28}`);
+    $('pv').innerHTML =
+      `<defs>${shadow}<mask id="m">` +
+      `<rect width="${w}" height="${h}" rx="${o.radius}" fill="#fff"/>` +
+      `<g fill="#000">${cut}</g></mask></defs>` +
+      `<rect width="${w}" height="${h}" rx="${o.radius}" fill="${o.color}" mask="url(#m)"` +
+      (o.shadow ? ' filter="url(#sh)"' : '') + '/>' +
+      `<rect x="${o.pad}" y="${o.pad}" width="${FW}" height="${FH}" fill="#e8e2d4"/>` +
+      `<g fill="#1a1a1a" opacity=".85">` +
+      `<circle cx="${o.pad + FW / 2}" cy="${o.pad + FH / 2 - 10}" r="46"/>` +
+      `<rect x="${o.pad + 28}" y="${o.pad + FH - 46}" width="86" height="20" rx="4"/>` +
+      `<rect x="${o.pad + FW - 116}" y="${o.pad + 26}" width="86" height="14" rx="4" opacity=".5"/></g>`;
+  }
+
+  let timer;
+  function apply(now) {
+    sync();
+    clearTimeout(timer);
+    const send = () => parent.postMessage({ pluginMessage: { type: 'apply', opts: opts() } }, '*');
+    now ? send() : (timer = setTimeout(send, 120)); // canvas rebuild is the slow part
+  }
+
+  for (const id of SLIDERS) {
+    $(id).oninput = () => apply();
+    $(id + '-n').onchange = (e) => { $(id).value = e.target.value; apply(true); };
+  }
+  $('color').oninput = () => apply();
+  $('shadow').onchange = () => apply(true);
+
+  $('presets').onclick = (e) => {
+    const p = PRESETS[e.target.dataset && e.target.dataset.preset];
+    if (p) { setOpts(p); apply(true); }
+  };
+  $('apply').onclick = () => apply(true);
+  $('reset').onclick = () => { setOpts(Object.assign({ color: '#FFFFFF', shadow: true }, PRESETS.classic)); apply(true); };
+
+  // Restore last-used settings.
+  onmessage = (e) => {
+    const m = e.data.pluginMessage;
+    if (m && m.type === 'init' && m.opts) setOpts(m.opts);
+    sync();
+  };
+
+  sync();
+</script>
