@@ -1,17 +1,18 @@
 const STAMP = 'Stamp Border';
 
 // Centers of the perforation holes, walking each edge.
-// Offsetting by half a step keeps holes off the corners and mirrors every edge.
+// Like a real perforated stamp, each corner gets a hole shared by both edges —
+// offsetting them inward instead leaves a sliver of paper stranded at the corner.
 function holeCenters(x0, y0, w, h, spacing) {
-  const out = [];
   const nx = Math.max(1, Math.round(w / spacing));
   const ny = Math.max(1, Math.round(h / spacing));
-  for (let i = 0; i < nx; i++) {
-    const cx = x0 + ((i + 0.5) * w) / nx;
+  const out = [];
+  for (let i = 0; i <= nx; i++) {
+    const cx = x0 + (i * w) / nx;
     out.push([cx, y0], [cx, y0 + h]);
   }
-  for (let i = 0; i < ny; i++) {
-    const cy = y0 + ((i + 0.5) * h) / ny;
+  for (let i = 1; i < ny; i++) { // skip i=0 and i=ny: the rows above own those corners
+    const cy = y0 + (i * h) / ny;
     out.push([x0, cy], [x0 + w, cy]);
   }
   return out;

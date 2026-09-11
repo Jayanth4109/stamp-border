@@ -2,7 +2,7 @@
 
 A Figma plugin that wraps any frame in a perforated postage-stamp edge.
 
-![preview](docs/preview.png)
+![Stamp Border preview](docs/preview.svg)
 
 Select a frame, run the plugin, drag the sliders. The perforation is a real
 boolean-subtracted vector shape, so it scales, recolors and exports like any

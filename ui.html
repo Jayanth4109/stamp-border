@@ -242,12 +242,12 @@
     const nx = Math.max(1, Math.round(w / o.spacing));
     const ny = Math.max(1, Math.round(h / o.spacing));
     let cut = '';
-    for (let i = 0; i < nx; i++) {
-      const cx = ((i + 0.5) * w) / nx;
+    for (let i = 0; i <= nx; i++) {
+      const cx = (i * w) / nx;
       cut += `<circle cx="${cx}" cy="0" r="${o.perf}"/><circle cx="${cx}" cy="${h}" r="${o.perf}"/>`;
     }
-    for (let i = 0; i < ny; i++) {
-      const cy = ((i + 0.5) * h) / ny;
+    for (let i = 1; i < ny; i++) {
+      const cy = (i * h) / ny;
       cut += `<circle cx="0" cy="${cy}" r="${o.perf}"/><circle cx="${w}" cy="${cy}" r="${o.perf}"/>`;
     }
     const shadow = o.shadow
