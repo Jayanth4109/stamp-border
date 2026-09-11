@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <style>
   :root {
     --bg: var(--figma-color-bg, #fff);
@@ -21,40 +22,57 @@
     user-select: none;
   }
 
-  /* --- preview --- */
-  .preview {
-    height: 168px;
+  /* --- preview ---
+     Checkerboard, not a flat fill: the perforations are genuinely cut out, and
+     the checker is what makes that legible instead of looking like paint. */
+  .stage {
+    position: relative;
+    height: 172px;
     display: grid;
     place-items: center;
     padding: 14px;
     border-radius: 8px;
-    background: #111;
     overflow: hidden;
+    background-color: #b9b9b9;
+    background-image:
+      linear-gradient(45deg, #a8a8a8 25%, transparent 25%, transparent 75%, #a8a8a8 75%),
+      linear-gradient(45deg, #a8a8a8 25%, transparent 25%, transparent 75%, #a8a8a8 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 6px 6px;
   }
-  .preview svg { max-width: 100%; max-height: 100%; display: block; }
+  .stage::after { /* hairline that survives both themes */
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14);
+    pointer-events: none;
+  }
+  .stage svg { max-width: 100%; max-height: 100%; display: block; }
 
-  /* --- presets --- */
-  .presets { display: flex; gap: 4px; margin: 12px 0; }
-  .chip {
-    flex: 1;
-    height: 26px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: transparent;
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 7px 1px 0;
     color: var(--text-dim);
-    font: inherit;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .12s, color .12s, border-color .12s;
+    font-variant-numeric: tabular-nums;
   }
-  .chip:hover { background: var(--bg-sunken); color: var(--text); }
-  .chip[aria-pressed="true"] {
-    background: var(--brand);
-    border-color: var(--brand);
-    color: var(--brand-text);
-  }
+  .meta b { font-weight: 500; color: var(--text); }
+  /* Lit when the sliders were recalled from the frame's own saved settings. */
+  #meta-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+  #meta-sel { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  #meta-sel.empty { font-style: italic; }
+  #meta-out { flex: none; }
 
   /* --- rows --- */
+  .section {
+    margin: 12px 1px 2px;
+    color: var(--text-dim);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
   .row { display: flex; align-items: center; height: 28px; gap: 8px; }
   .row > .label { width: 74px; color: var(--text-dim); flex: none; }
 
@@ -81,10 +99,10 @@
     background: var(--bg);
     border: 1px solid var(--text-dim);
     box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
-    transition: border-color .12s;
+    transition: border-color .12s, transform .12s;
   }
-  input[type=range]:hover::-webkit-slider-thumb,
-  input[type=range]:active::-webkit-slider-thumb { border-color: var(--brand); }
+  input[type=range]:hover::-webkit-slider-thumb { border-color: var(--brand); }
+  input[type=range]:active::-webkit-slider-thumb { border-color: var(--brand); transform: scale(1.15); }
 
   .num {
     width: 40px;
@@ -139,10 +157,9 @@
   .switch input:checked + .track { background: var(--brand); }
   .switch input:checked + .track::after { transform: translateX(12px); }
 
-  hr { border: 0; border-top: 1px solid var(--border); margin: 10px 0; }
-
   /* --- footer --- */
-  footer { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+  footer { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+  .actions { display: flex; justify-content: space-between; margin-top: 2px; }
   .btn {
     flex: 1;
     height: 32px;
@@ -157,6 +174,7 @@
   }
   .btn:hover { filter: brightness(1.08); }
   .btn:active { filter: brightness(.94); }
+  .btn:disabled { background: var(--border); color: var(--text-dim); cursor: default; filter: none; }
   .link {
     border: 0;
     background: none;
@@ -165,18 +183,18 @@
     cursor: pointer;
     padding: 6px;
   }
-  .link:hover { color: var(--text); }
+  .link:hover:enabled { color: var(--text); }
+  .link:disabled { opacity: .4; cursor: default; }
 </style>
 
-<div class="preview"><svg id="pv" preserveAspectRatio="xMidYMid meet"></svg></div>
-
-<div class="presets" id="presets">
-  <button class="chip" data-preset="classic">Classic</button>
-  <button class="chip" data-preset="fine">Fine</button>
-  <button class="chip" data-preset="chunky">Chunky</button>
-  <button class="chip" data-preset="rounded">Rounded</button>
+<div class="stage"><svg id="pv" preserveAspectRatio="xMidYMid meet"></svg></div>
+<div class="meta">
+  <span id="meta-dot" title="Settings recalled from this stamp" hidden></span>
+  <span id="meta-sel" class="empty">No frame selected</span>
+  <span id="meta-out"></span>
 </div>
 
+<div class="section">Perforation</div>
 <div class="row"><span class="label">Padding</span>
   <input type="range" id="pad" min="0" max="120" value="28"><input class="num" id="pad-n" type="number"></div>
 <div class="row"><span class="label">Perf size</span>
@@ -186,9 +204,8 @@
 <div class="row"><span class="label">Corner</span>
   <input type="range" id="radius" min="0" max="60" value="0"><input class="num" id="radius-n" type="number"></div>
 
-<hr>
-
-<div class="row"><span class="label">Paper</span>
+<div class="section">Paper</div>
+<div class="row"><span class="label">Fill</span>
   <input class="swatch" type="color" id="color" value="#FFFFFF">
   <span class="hexval" id="hexval">#FFFFFF</span></div>
 <div class="row"><span class="label">Shadow</span>
@@ -196,19 +213,23 @@
 
 <footer>
   <button class="btn" id="apply">Apply to selection</button>
-  <button class="link" id="reset">Reset</button>
 </footer>
+<div class="actions">
+  <button class="link" id="remove" disabled>Remove stamp</button>
+  <button class="link" id="reset">Reset settings</button>
+</div>
 
 <script>
   const $ = (id) => document.getElementById(id);
   const SLIDERS = ['pad', 'perf', 'spacing', 'radius'];
 
-  const PRESETS = {
-    classic: { pad: 28, perf: 9, spacing: 22, radius: 0 },
-    fine: { pad: 20, perf: 5, spacing: 12, radius: 0 },
-    chunky: { pad: 36, perf: 16, spacing: 40, radius: 0 },
-    rounded: { pad: 30, perf: 10, spacing: 24, radius: 16 },
-  };
+  const DEFAULTS = { pad: 28, perf: 9, spacing: 22, radius: 0, color: '#FFFFFF', shadow: true };
+
+  // The selected frame, as reported by code.js — null when nothing is selected,
+  // in which case the preview falls back to a stand-in.
+  let sel = null;
+  let selId = null;
+  const STANDIN = { w: 400, h: 260 };
 
   function opts() {
     const o = { color: $('color').value, shadow: $('shadow').checked };
@@ -222,25 +243,65 @@
     if (o.shadow != null) $('shadow').checked = o.shadow;
   }
 
-  // Keep number boxes, hex label, preset highlight and preview in step.
+  // Keep number boxes, hex label, readout and preview in step.
   function sync() {
     const o = opts();
     for (const id of SLIDERS) $(id + '-n').value = o[id];
     $('hexval').textContent = o.color.toUpperCase();
-    for (const chip of $('presets').children) {
-      const p = PRESETS[chip.dataset.preset];
-      chip.setAttribute('aria-pressed', SLIDERS.every((k) => p[k] === o[k]));
-    }
-    drawPreview(o);
+
+    const frame = sel || STANDIN;
+    const w = frame.w + o.pad * 2, h = frame.h + o.pad * 2;
+    const [nx, ny] = counts(w, h, o.spacing);
+    $('meta-out').innerHTML =
+      `<b>${Math.round(w)} × ${Math.round(h)}</b> · ${2 * (nx + 1) + 2 * (ny - 1)} perfs`;
+    drawPreview(o, frame);
   }
 
-  // Preview stands in for a 400x260 frame; the SVG viewBox does the scaling.
+  function counts(w, h, spacing) {
+    return [Math.max(1, Math.round(w / spacing)), Math.max(1, Math.round(h / spacing))];
+  }
+
+  // The printed panel, laid out in the frame's own coordinates. A fixed viewBox
+  // would have to either letterbox or crop — and cropping eats the lettering on
+  // square-ish frames — so every element is placed as a fraction of w and h.
+  // Circles and birds key off min(w, h) so they stay round on extreme shapes.
+  function vignette(x, y, w, h) {
+    const ink = '#33413f', paper = '#ece5d5';
+    const u = Math.min(w, h);
+    const bh = Math.max(10, Math.min(h * 0.13, 46));        // caption band
+    const gy = h - bh;                                      // ground line
+    const r = u * 0.09;                                     // sun
+    const px = w * 0.6, py = h * 0.28;                      // main peak
+    const bl = w * 0.26, br = w * 0.96;                     // and its base
+    const t = 0.74;                                         // snow line, up the slope
+    const sy = py + (gy - py) * (1 - t);
+    const bird = u * 0.035;
+    const cap = Math.max(5, Math.min(bh * 0.46, w * 0.055));
+    const num = h * 0.17;
+    const arc = (bx, by) => `M${bx} ${by} q${bird} ${-bird} ${bird * 2} 0`;
+    return (
+      `<g transform="translate(${x} ${y})">` +
+      `<rect width="${w}" height="${h}" fill="${paper}"/>` +
+      `<circle cx="${w - r - w * 0.09}" cy="${r + h * 0.09}" r="${r}" fill="#c2593c" opacity=".9"/>` +
+      `<path d="M${w * 0.01} ${gy} L${w * 0.24} ${h * 0.46} L${w * 0.52} ${gy} Z" fill="${ink}" opacity=".5"/>` +
+      `<path d="M${bl} ${gy} L${px} ${py} L${br} ${gy} Z" fill="${ink}"/>` +
+      `<path d="M${px} ${py} L${br + (px - br) * t} ${sy} L${bl + (px - bl) * t} ${sy} Z"` +
+      ` fill="${paper}" opacity=".92"/>` +
+      `<path d="${arc(w * 0.3, h * 0.2)} ${arc(w * 0.4, h * 0.14)}" fill="none" stroke="${ink}"` +
+      ` stroke-width="${Math.max(1, u * 0.012)}" stroke-linecap="round" opacity=".45"/>` +
+      `<text x="${w * 0.045}" y="${h * 0.06 + num}" font-size="${num}" font-weight="700"` +
+      ` fill="${ink}" font-family="Georgia, 'Times New Roman', serif">25</text>` +
+      `<rect y="${gy}" width="${w}" height="${bh}" fill="${ink}"/>` +
+      `<text x="${w * 0.035}" y="${h - bh * 0.33}" font-size="${cap}" fill="${paper}"` +
+      ` letter-spacing="${cap * 0.22}" font-family="Georgia, 'Times New Roman', serif">STAMP BORDER</text>` +
+      `</g>`
+    );
+  }
+
   // Mirrors holeCenters() in code.js — no bundler here, so the loop is repeated.
-  function drawPreview(o) {
-    const FW = 400, FH = 260;
-    const w = FW + o.pad * 2, h = FH + o.pad * 2;
-    const nx = Math.max(1, Math.round(w / o.spacing));
-    const ny = Math.max(1, Math.round(h / o.spacing));
+  function drawPreview(o, frame) {
+    const w = frame.w + o.pad * 2, h = frame.h + o.pad * 2;
+    const [nx, ny] = counts(w, h, o.spacing);
     let cut = '';
     for (let i = 0; i <= nx; i++) {
       const cx = (i * w) / nx;
@@ -250,52 +311,68 @@
       const cy = (i * h) / ny;
       cut += `<circle cx="0" cy="${cy}" r="${o.perf}"/><circle cx="${w}" cy="${cy}" r="${o.perf}"/>`;
     }
-    const shadow = o.shadow
-      ? '<filter id="sh" x="-20%" y="-20%" width="140%" height="140%">' +
-        '<feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.45"/></filter>'
-      : '';
-    $('pv').setAttribute('viewBox', `-14 -14 ${w + 28} ${h + 28}`);
+
+    // Pad the viewBox by the hole radius so edge bites are never clipped.
+    const m = Math.max(16, o.perf + 6);
+    $('pv').setAttribute('viewBox', `${-m} ${-m} ${w + m * 2} ${h + m * 2}`);
     $('pv').innerHTML =
-      `<defs>${shadow}<mask id="m">` +
+      `<defs>` +
+      `<filter id="sh" x="-25%" y="-25%" width="150%" height="150%">` +
+      `<feDropShadow dx="0" dy="4" stdDeviation="7" flood-opacity=".4"/></filter>` +
+      `<mask id="m">` +
       `<rect width="${w}" height="${h}" rx="${o.radius}" fill="#fff"/>` +
-      `<g fill="#000">${cut}</g></mask></defs>` +
-      `<rect width="${w}" height="${h}" rx="${o.radius}" fill="${o.color}" mask="url(#m)"` +
-      (o.shadow ? ' filter="url(#sh)"' : '') + '/>' +
-      `<rect x="${o.pad}" y="${o.pad}" width="${FW}" height="${FH}" fill="#e8e2d4"/>` +
-      `<g fill="#1a1a1a" opacity=".85">` +
-      `<circle cx="${o.pad + FW / 2}" cy="${o.pad + FH / 2 - 10}" r="46"/>` +
-      `<rect x="${o.pad + 28}" y="${o.pad + FH - 46}" width="86" height="20" rx="4"/>` +
-      `<rect x="${o.pad + FW - 116}" y="${o.pad + 26}" width="86" height="14" rx="4" opacity=".5"/></g>`;
+      `<g fill="#000">${cut}</g></mask>` +
+      `<clipPath id="c">` +
+      `<rect width="${w}" height="${h}" rx="${o.radius}"/></clipPath>` +
+      `</defs>` +
+      `<g${o.shadow ? ' filter="url(#sh)"' : ''}>` +
+      `<g mask="url(#m)">` +
+      `<rect width="${w}" height="${h}" rx="${o.radius}" fill="${o.color}"/>` +
+      `<g clip-path="url(#c)">${vignette(o.pad, o.pad, frame.w, frame.h)}</g>` +
+      `</g></g>`;
   }
 
-  let timer;
-  function apply(now) {
-    sync();
-    clearTimeout(timer);
-    const send = () => parent.postMessage({ pluginMessage: { type: 'apply', opts: opts() } }, '*');
-    now ? send() : (timer = setTimeout(send, 120)); // canvas rebuild is the slow part
+  function send(type) {
+    parent.postMessage({ pluginMessage: { type: type, opts: opts() } }, '*');
   }
 
+  // The controls drive the preview and nothing else. Rebuilding the canvas on
+  // every input meant the plugin edited the document without being asked and
+  // buried the undo stack under a step per slider tick.
   for (const id of SLIDERS) {
-    $(id).oninput = () => apply();
-    $(id + '-n').onchange = (e) => { $(id).value = e.target.value; apply(true); };
+    $(id).oninput = sync;
+    $(id + '-n').onchange = (e) => { $(id).value = e.target.value; sync(); };
   }
-  $('color').oninput = () => apply();
-  $('shadow').onchange = () => apply(true);
+  $('color').oninput = sync;
+  $('shadow').onchange = sync;
 
-  $('presets').onclick = (e) => {
-    const p = PRESETS[e.target.dataset && e.target.dataset.preset];
-    if (p) { setOpts(p); apply(true); }
-  };
-  $('apply').onclick = () => apply(true);
-  $('reset').onclick = () => { setOpts(Object.assign({ color: '#FFFFFF', shadow: true }, PRESETS.classic)); apply(true); };
+  $('apply').onclick = () => send('apply');
+  $('remove').onclick = () => send('remove');
+  $('reset').onclick = () => { setOpts(DEFAULTS); sync(); };
 
-  // Restore last-used settings.
   onmessage = (e) => {
     const m = e.data.pluginMessage;
-    if (m && m.type === 'init' && m.opts) setOpts(m.opts);
+    if (!m || m.type !== 'selection') return;
+
+    // Only adopt the reported settings when the selection actually moved to a
+    // different frame. Every apply echoes back a selection, and swallowing that
+    // is what stops a mid-drag rebuild from yanking the slider out from under
+    // the cursor.
+    if (m.id !== selId && m.opts) setOpts(m.opts);
+    selId = m.id;
+    sel = m.count ? { w: m.w, h: m.h } : null;
+
+    const label = $('meta-sel');
+    label.classList.toggle('empty', !sel);
+    label.textContent = sel
+      ? (m.count > 1 ? `${m.count} frames` : m.name) + ` · ${Math.round(m.w)} × ${Math.round(m.h)}`
+      : 'No frame selected';
+    $('meta-dot').hidden = !m.stamped;
+    $('apply').disabled = !sel;
+    $('remove').disabled = !m.stamped;
     sync();
   };
 
   sync();
+  parent.postMessage({ pluginMessage: { type: 'ready' } }, '*');
 </script>

@@ -1,25 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="576" height="466" viewBox="-34 -34 576 466" role="img" aria-label="Stamp Border plugin preview">
+<svg xmlns="http://www.w3.org/2000/svg" width="580" height="470" viewBox="-36 -36 580 470" role="img" aria-label="A frame wrapped in a perforated postage-stamp border by the Stamp Border Figma plugin">
   <defs>
-    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="5" stdDeviation="9" flood-opacity="0.5"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#181c1f"/>
+      <stop offset="1" stop-color="#0d1012"/>
+    </linearGradient>
+    <filter id="sh" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-opacity=".55"/>
     </filter>
     <mask id="perf">
-      <rect width="508" height="398" fill="#fff"/>
+      <rect width="508" height="398" rx="0" fill="#fff"/>
       <g fill="#000"><circle cx="0" cy="0" r="11"/><circle cx="0" cy="398" r="11"/><circle cx="25.4" cy="0" r="11"/><circle cx="25.4" cy="398" r="11"/><circle cx="50.8" cy="0" r="11"/><circle cx="50.8" cy="398" r="11"/><circle cx="76.2" cy="0" r="11"/><circle cx="76.2" cy="398" r="11"/><circle cx="101.6" cy="0" r="11"/><circle cx="101.6" cy="398" r="11"/><circle cx="127" cy="0" r="11"/><circle cx="127" cy="398" r="11"/><circle cx="152.4" cy="0" r="11"/><circle cx="152.4" cy="398" r="11"/><circle cx="177.8" cy="0" r="11"/><circle cx="177.8" cy="398" r="11"/><circle cx="203.2" cy="0" r="11"/><circle cx="203.2" cy="398" r="11"/><circle cx="228.6" cy="0" r="11"/><circle cx="228.6" cy="398" r="11"/><circle cx="254" cy="0" r="11"/><circle cx="254" cy="398" r="11"/><circle cx="279.4" cy="0" r="11"/><circle cx="279.4" cy="398" r="11"/><circle cx="304.8" cy="0" r="11"/><circle cx="304.8" cy="398" r="11"/><circle cx="330.2" cy="0" r="11"/><circle cx="330.2" cy="398" r="11"/><circle cx="355.6" cy="0" r="11"/><circle cx="355.6" cy="398" r="11"/><circle cx="381" cy="0" r="11"/><circle cx="381" cy="398" r="11"/><circle cx="406.4" cy="0" r="11"/><circle cx="406.4" cy="398" r="11"/><circle cx="431.8" cy="0" r="11"/><circle cx="431.8" cy="398" r="11"/><circle cx="457.2" cy="0" r="11"/><circle cx="457.2" cy="398" r="11"/><circle cx="482.6" cy="0" r="11"/><circle cx="482.6" cy="398" r="11"/><circle cx="508" cy="0" r="11"/><circle cx="508" cy="398" r="11"/><circle cx="0" cy="26.53" r="11"/><circle cx="508" cy="26.53" r="11"/><circle cx="0" cy="53.07" r="11"/><circle cx="508" cy="53.07" r="11"/><circle cx="0" cy="79.6" r="11"/><circle cx="508" cy="79.6" r="11"/><circle cx="0" cy="106.13" r="11"/><circle cx="508" cy="106.13" r="11"/><circle cx="0" cy="132.67" r="11"/><circle cx="508" cy="132.67" r="11"/><circle cx="0" cy="159.2" r="11"/><circle cx="508" cy="159.2" r="11"/><circle cx="0" cy="185.73" r="11"/><circle cx="508" cy="185.73" r="11"/><circle cx="0" cy="212.27" r="11"/><circle cx="508" cy="212.27" r="11"/><circle cx="0" cy="238.8" r="11"/><circle cx="508" cy="238.8" r="11"/><circle cx="0" cy="265.33" r="11"/><circle cx="508" cy="265.33" r="11"/><circle cx="0" cy="291.87" r="11"/><circle cx="508" cy="291.87" r="11"/><circle cx="0" cy="318.4" r="11"/><circle cx="508" cy="318.4" r="11"/><circle cx="0" cy="344.93" r="11"/><circle cx="508" cy="344.93" r="11"/><circle cx="0" cy="371.47" r="11"/><circle cx="508" cy="371.47" r="11"/></g>
     </mask>
+    <clipPath id="paper"><rect width="508" height="398" rx="0"/></clipPath>
   </defs>
-  <rect x="-34" y="-34" width="576" height="466" fill="#0d0d0d"/>
-  <rect width="508" height="398" fill="#ffffff" mask="url(#perf)" filter="url(#sh)"/>
-
-    <rect x="34" y="34" width="440" height="330" fill="#e9e3d5"/>
-    <g fill="#141414">
-      <path d="M154 244 L154 104 L214 174 L244 94 L284 184 L354 154 L334 244 Z"/>
-      <circle cx="202" cy="202" r="13" fill="#8a6a3d"/>
-      <path d="M152 266 h190 l-52 52 h-86 Z" fill="#8a6a3d"/>
+  <rect x="-36" y="-36" width="580" height="470" fill="url(#bg)"/>
+  <g filter="url(#sh)">
+    <g mask="url(#perf)">
+      <rect width="508" height="398" rx="0" fill="#ffffff"/>
+      <g clip-path="url(#paper)"><g transform="translate(34 34)"><rect width="440" height="330" fill="#ece5d5"/><circle cx="370.7" cy="59.4" r="29.7" fill="#c2593c" opacity=".9"/><path d="M4.4 287.1 L105.6 151.8 L228.8 287.1 Z" fill="#33413f" opacity=".5"/><path d="M114.4 287.1 L264 92.4 L422.4 287.1 Z" fill="#33413f"/><path d="M264 92.4 L305.18399999999997 143.02200000000002 L225.10399999999998 143.02200000000002 Z" fill="#ece5d5" opacity=".92"/><path d="M132 66 q11.55 -11.55 23.1 0 M176 46.2 q11.55 -11.55 23.1 0" fill="none" stroke="#33413f" stroke-width="3.96" stroke-linecap="round" opacity=".45"/><text x="19.8" y="75.9" font-size="56.1" font-weight="700" fill="#33413f" font-family="Georgia, 'Times New Roman', serif">25</text><rect y="287.1" width="440" height="42.9" fill="#33413f"/><text x="15.400000000000002" y="315.843" font-size="19.734" fill="#ece5d5" letter-spacing="4.341480000000001" font-family="Georgia, 'Times New Roman', serif">STAMP BORDER</text></g></g>
     </g>
-    <g fill="#141414" font-family="Georgia, serif">
-      <text x="62" y="80" font-size="30" font-weight="bold">Stamp Border</text>
-      <text x="62" y="340" font-size="34" font-weight="bold">76&#162;</text>
-      <text x="446" y="340" font-size="17" text-anchor="end">figma plugin</text>
-    </g>
+  </g>
 </svg>
