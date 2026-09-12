@@ -2,7 +2,7 @@
 
 A Figma plugin that wraps any frame in a perforated postage-stamp edge.
 
-![Stamp Border preview](docs/preview.svg)
+![Stamp Border preview](docs/preview.png)
 
 Select a frame, run the plugin, set the controls, press Apply. The perforation
 is a real boolean-subtracted vector shape, so it scales, recolors and exports
@@ -113,7 +113,6 @@ node check-rebuild.js
 | `ui.html` | Panel UI with live SVG preview |
 | `check.js` | Geometry assertions |
 | `check-rebuild.js` | Rebuild assertions, against a stub Figma API |
-| `docs/gen-preview.js` | Regenerates the image at the top of this README |
 | `logo-svg.svg`, `logo-png.png` | Plugin mark — source of the panel gradient |
 
 ## License
