@@ -688,19 +688,13 @@
   document.addEventListener('click', () => openPicker(false));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') openPicker(false); });
 
-  // The EyeDropper API is Chromium-only and needs a secure context with user
-  // activation, neither of which is guaranteed inside a sandboxed plugin
-  // iframe. Feature-detect to show it; if open() rejects for anything other
-  // than the user dismissing it, say so and retire the button rather than
-  // leaving a control that silently does nothing.
   // No screen eyedropper: the browser's EyeDropper API needs a secure context
   // with user activation and Figma runs plugin UI in a sandboxed null-origin
   // iframe, so it only ever refused. There's no plugin API for it either.
 
   // --- wiring --------------------------------------------------------------
-  // The controls drive the preview and nothing else. Rebuilding the canvas on
-  // every input meant the plugin edited the document without being asked and
-  // buried the undo stack under a step per slider tick.
+  // The controls drive the preview and nothing else — the canvas changes only on
+  // Apply, so the plugin never edits the document unasked.
   for (const id of SLIDERS) {
     $(id).oninput = sync;
     scrub(id);

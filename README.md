@@ -4,9 +4,9 @@ A Figma plugin that wraps any frame in a perforated postage-stamp edge.
 
 ![Stamp Border preview](docs/preview.svg)
 
-Select a frame, run the plugin, drag the sliders. The perforation is a real
-boolean-subtracted vector shape, so it scales, recolors and exports like any
-other Figma layer.
+Select a frame, run the plugin, set the controls, press Apply. The perforation
+is a real boolean-subtracted vector shape, so it scales, recolors and exports
+like any other Figma layer.
 
 ## Install
 
@@ -33,26 +33,26 @@ The panel previews your actual selection — it takes the frame's real proportio
 and reports the finished size and perforation count as you drag.
 
 Re-running on an already-stamped frame re-cuts it in place instead of nesting
-another border, so you can drag the sliders and watch the canvas update. The
-result is a group named `Stamp Border` holding three layers — the `Perforation`
-mask, the `Paper` it cuts, and a `Content` group wrapping your original frame.
-Your frame is never altered; **Remove stamp** gives it back on its own.
+another border. The result is a group named `Stamp Border` holding three
+layers — the `Perforation` mask, the `Paper` it cuts, and a `Content` group
+wrapping your original frame. Your frame is never altered; **Remove stamp**
+gives it back on its own.
 
 At zero padding the paper is exactly the size of your frame, so the perforation
 bites into the frame's own artwork. Raise the padding and the bites move out
 into the paper margin instead.
 
 Each stamp remembers its own settings. Select a frame you stamped earlier and
-the sliders land back on the values you used, with a dot next to the frame name
+the controls land back on the values you used, with a dot next to the frame name
 to say so — so you can come back a week later and nudge the perf size without
 guessing what it was. A frame you've never stamped starts from the defaults —
 padding 20, perf size 8, perf spacing 25, corner 0, white paper, shadow on.
 
 Dragging a control only redraws the panel preview. The canvas changes when you
-press **Apply to selection** — nothing edits your document behind your back, and
-one apply is one undo step. **Remove stamp** gives the frame back on its own and
-forgets its saved settings. **Reset settings** returns the controls to the
-defaults without touching the canvas.
+press **Apply to selection**, so nothing edits your document behind your back.
+**Remove stamp** gives the frame back on its own and forgets its saved
+settings. **Reset settings** returns the controls to the defaults without
+touching the canvas.
 
 ## How it works
 
@@ -69,10 +69,10 @@ traces the perforated edge rather than a plain rectangle).
 
 **A Figma mask does not reach inside a frame that clips its content.** Mask a
 frame directly and it renders uncut, while an otherwise identical rectangle
-sibling cuts correctly — so zero padding appeared to do nothing at all. Wrapping
-the frame in a plain group and masking the group works, which is what the
-`Content` layer is for. Setting the frame's `clipsContent` to `false` also
-works, but that changes the user's frame; the wrapper doesn't touch it.
+sibling cuts correctly. Wrapping the frame in a plain group and masking the
+group does work, which is what the `Content` layer is for. Setting the frame's
+`clipsContent` to `false` works too, but that alters the user's frame; the
+wrapper doesn't.
 
 The pieces `build()` makes are tagged with `setPluginData('role', …)`, so
 re-running finds the user's frame as the one child without a role — more durable
@@ -87,18 +87,17 @@ math, and it's what `check.js` covers.
 Settings are stored with `setPluginData` on the frame rather than on the wrapper
 group, so they survive a rebuild, an ungroup and a duplicate. Nothing is kept
 globally: a frame with no stamp reports no settings and the panel starts from
-its defaults. An earlier version fell back to the last-used values instead,
-which meant the defaults were never what you actually saw.
+its own defaults.
 
 The panel only adopts reported settings when the selection moves to a different
-frame — every apply echoes a selection back, and swallowing that is what keeps a
-mid-drag rebuild from yanking a control out from under the cursor.
+frame — every apply echoes a selection back, and swallowing that is what stops
+a rebuild from resetting a control you have just changed.
 
 Re-running has to re-cut in place rather than stack a second stamp, so it lifts
 the frame out of its old group and takes the stale perforation with it — the
-group holds the perforation too, so it won't disappear on its own. Dragging a
-slider fires a run of applies, and `check-rebuild.js` drives `code.js` against a
-stub of the Figma node API to assert that run still leaves exactly one group.
+group holds the perforation too, so it won't disappear on its own.
+`check-rebuild.js` drives `code.js` against a stub of the Figma node API to
+assert that a run of applies still leaves exactly one group behind.
 
 ```bash
 node check.js
@@ -115,6 +114,7 @@ node check-rebuild.js
 | `check.js` | Geometry assertions |
 | `check-rebuild.js` | Rebuild assertions, against a stub Figma API |
 | `docs/gen-preview.js` | Regenerates the image at the top of this README |
+| `logo-svg.svg`, `logo-png.png` | Plugin mark — source of the panel gradient |
 
 ## License
 

@@ -45,9 +45,7 @@ function main() {
 
 // Hand the UI the frame's real shape, plus the settings this frame was stamped
 // with so the controls land exactly where the user left them. A frame that has
-// never been stamped reports none, and the UI falls back to its defaults —
-// carrying the last-used settings over instead meant the defaults were never
-// what you actually saw.
+// never been stamped reports none, and the UI falls back to its own defaults.
 function report(targets) {
   const n = targets[0];
   figma.ui.postMessage({
@@ -75,7 +73,7 @@ function readOpts(node) {
 // --- targets -----------------------------------------------------------
 
 // A stamp group resolves to its content, so re-running just re-cuts it. The
-// parts we build carry a role tag, so whatever is left is the user's frame —
+// parts build() creates carry a role tag, so whatever is left is the frame —
 // which beats matching on type or name, both of which they can change.
 function inner(n) {
   if (n.type !== 'GROUP' || n.name !== STAMP) return n;
@@ -114,8 +112,8 @@ function unwrap(node) {
 }
 
 // Give the frame back on its own, carrying nothing of ours. The saved settings
-// go too: with no stamp left, reporting them would light the recall dot for a
-// stamp that isn't there. The UI keeps showing them either way.
+// go too — with no stamp left, reporting them would light the recall dot for a
+// stamp that isn't there.
 function strip(node) {
   if (!stampOf(node)) return false;
   unwrap(node);
@@ -128,10 +126,9 @@ function strip(node) {
 function build(node, o) {
   const parent = node.parent;
 
-  // A Figma mask does not reach inside a frame that clips its content — mask the
-  // frame directly and it comes out uncut, which is why zero padding used to do
-  // nothing. Masking a plain group around it does work, so the frame rides in a
-  // wrapper and the mask clips that.
+  // A Figma mask does not reach inside a frame that clips its content: mask the
+  // frame directly and it renders uncut. Masking a plain group around it does
+  // work, so the frame rides in a wrapper and the mask clips that instead.
   const wrap = figma.group([node], parent);
   wrap.name = 'Content';
   wrap.setPluginData('role', 'wrap');
